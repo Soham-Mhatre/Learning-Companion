@@ -4,6 +4,12 @@ export const addToChecklist = async (req, res) => {
   const { content, type } = req.body;
   const userId = req.user.id;
 
+  console.log('Received content:', content); // Log the received content
+
+  if (!content || !content.week || !content.topic) {
+    return res.status(400).json({ error: 'Invalid content structure' });
+  }
+
   try {
     const checklistItem = new Checklist({
       userId,
@@ -12,11 +18,15 @@ export const addToChecklist = async (req, res) => {
     });
     await checklistItem.save();
 
+    console.log('Saved checklist item:', checklistItem); // Log the saved item
+
     res.status(201).json({ message: 'Added to checklist', item: checklistItem });
   } catch (error) {
+    console.error('Error adding to checklist:', error);
     res.status(500).json({ error: 'Failed to add to checklist' });
   }
 };
+
 
 export const getChecklist = async (req, res) => {
   const userId = req.user.id;

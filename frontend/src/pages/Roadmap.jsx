@@ -42,24 +42,38 @@ const Roadmap = () => {
     }
   };
 
-  const addToChecklist = async (content) => {
+  const addToChecklist = async (blockContent) => {
     try {
+      console.log('Adding to checklist:', blockContent); // Log the content being sent
       const response = await fetch('http://localhost:5000/api/checklist/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({ content, type: 'roadmap' }),
+        body: JSON.stringify({ 
+          content: {
+            week: blockContent.week,
+            topic: blockContent.topic,
+            learningObjectives: blockContent.learningObjectives,
+            resources: blockContent.resources,
+            practiceExercises: blockContent.practiceExercises
+          }, 
+          type: 'roadmap' 
+        }),
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to add to checklist');
       }
-
-      // Optionally, you can show a success message here
+  
+      const result = await response.json();
+      console.log('Server response:', result); // Log the server response
+  
+      alert('Added to checklist successfully!');
     } catch (error) {
       console.error('Error adding to checklist:', error);
+      alert('Failed to add to checklist');
     }
   };
 
