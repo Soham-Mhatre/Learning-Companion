@@ -1,14 +1,13 @@
 import Checklist from '../models/Checklist.js';
 
 export const addToChecklist = async (req, res) => {
-  const { content, type } = req.body;
+  const { content } = req.body;
   const userId = req.user.id;
 
   try {
     const checklistItem = new Checklist({
       userId,
       content,
-      type,
     });
     await checklistItem.save();
 
@@ -29,24 +28,30 @@ export const getChecklist = async (req, res) => {
   }
 };
 
-export const updateChecklistItem = async (req, res) => {
+export const removeChecklistItem = async (req, res) => {
   const { id } = req.params;
-  const { completed } = req.body;
   const userId = req.user.id;
 
   try {
-    const updatedItem = await Checklist.findOneAndUpdate(
-      { _id: id, userId },
-      { completed },
-      { new: true }
-    );
+    const removedItem = await Checklist.findOneAndRemove({ _id: id, userId });
 
-    if (!updatedItem) {
+    if (!removedItem) {
       return res.status(404).json({ error: 'Checklist item not found' });
     }
 
-    res.status(200).json({ message: 'Checklist item updated', item: updatedItem });
+    res.status(200).json({ message: 'Checklist item removed', item: removedItem });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to update checklist item' });
+    res.status(500).json({ error: 'Failed to remove checklist item' });
+  }
+};
+
+export const clearChecklist = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    await Checklist.deleteMany({ userId });
+    res.status(200).json({ message: 'Checklist cleared' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to clear checklist' });
   }
 };
